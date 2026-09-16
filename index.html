@@ -6,1263 +6,597 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#07090d" />
-    <meta
-      name="description"
-      content="Flower Roleplay — an immersive AI-powered roleplay workspace. Pick a character, build a scene, and lose yourself in the story."
-    />
-    <meta
-      name="keywords"
-      content="roleplay, AI, character chat, interactive fiction, story, Pollinations"
-    />
-    <meta name="author" content="Flower Roleplay" />
-    <meta property="og:title" content="Flower Roleplay" />
-    <meta
-      property="og:description"
-      content="Immersive AI-powered roleplay. Build worlds. Live stories."
-    />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Flower Roleplay" />
-    <meta
-      name="twitter:description"
-      content="Immersive AI-powered roleplay. Build worlds. Live stories."
-    />
-    <title>Flower Roleplay</title>
+    <meta name="theme-color" content="#08080b" />
+
+    <title>RoleAI</title>
+
+    <!-- Premium Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Configuration for Custom Font & Colors -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', "sans-serif"],
+            },
+            colors: {
+              dark: {
+                900: "#050507",
+                800: "#0a0a0e",
+                700: "#121218",
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <script
+      src="https://kit.fontawesome.com/97fba59076.js"
+      crossorigin="anonymous"
+    ></script>
+
     <style>
-      :root {
-        --ink: #07090d;
-        --deep: #0b0e14;
-        --surface: #111620;
-        --surfaceUp: #161d2e;
-        --rim: rgba(255, 255, 255, 0.07);
-        --rimHot: rgba(216, 174, 110, 0.35);
-        --copy: #ede8df;
-        --copyDim: #7e8a9c;
-        --gold: #d8ae6e;
-        --goldBright: #f0ca8c;
-        --goldGlow: rgba(216, 174, 110, 0.18);
-        --radius: 24px;
-        --radiusLg: 32px;
-      }
-
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html {
-        -webkit-font-smoothing: antialiased;
-        scroll-behavior: smooth;
-      }
-
-      body {
-        min-height: 100dvh;
-        background: var(--ink);
-        color: var(--copy);
-        font-family: "DM Sans", system-ui, sans-serif;
-        font-size: 15px;
-        line-height: 1.6;
-        overflow-x: hidden;
-      }
-
-      body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-        opacity: 0.028;
-      }
-
-      body::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        background:
-          radial-gradient(
-            ellipse 60% 40% at 15% 0%,
-            rgba(216, 174, 110, 0.09) 0%,
-            transparent 65%
-          ),
-          radial-gradient(
-            ellipse 50% 40% at 85% 5%,
-            rgba(91, 136, 190, 0.07) 0%,
-            transparent 60%
-          ),
-          radial-gradient(
-            ellipse 80% 50% at 50% 100%,
-            rgba(30, 15, 5, 0.6) 0%,
-            transparent 70%
-          );
-      }
-
-      #app {
-        position: relative;
-        z-index: 1;
-      }
-
-      .screen {
-        display: none !important;
-      }
-      .screen.active {
-        display: block !important;
-      }
-
-      @keyframes fadeUp {
-        from {
-          opacity: 0;
-          transform: translateY(22px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.4;
-        }
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      .anim-fadeUp {
-        animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-      }
-      .anim-fadeUp-2 {
-        animation: fadeUp 0.55s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
-      }
-      .anim-fadeUp-3 {
-        animation: fadeUp 0.55s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
-      }
-
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 12px;
-        border-radius: 100px;
-        background: rgba(216, 174, 110, 0.12);
-        border: 1px solid rgba(216, 174, 110, 0.22);
-        font-size: 11px;
-        font-weight: 500;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--gold);
-      }
-      .badge::before {
-        content: "";
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--gold);
-        animation: pulse 2.5s ease-in-out infinite;
-      }
-
-      .glass {
-        background: rgba(17, 22, 32, 0.82);
-        border: 1px solid var(--rim);
-        backdrop-filter: blur(20px) saturate(1.4);
-        -webkit-backdrop-filter: blur(20px) saturate(1.4);
-        border-radius: var(--radiusLg);
-      }
-
-      .input {
-        width: 100%;
-        padding: 14px 18px;
-        border-radius: var(--radius);
-        border: 1px solid var(--rim);
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--copy);
-        font-family: inherit;
-        font-size: 15px;
-        outline: none;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s,
-          background 0.2s;
-      }
-      .input::placeholder {
-        color: var(--copyDim);
-      }
-      .input:focus {
-        border-color: rgba(216, 174, 110, 0.5);
-        background: rgba(255, 255, 255, 0.06);
-        box-shadow:
-          0 0 0 4px rgba(216, 174, 110, 0.08),
-          inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      }
-
-      .btn-primary {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 14px 26px;
-        border-radius: var(--radius);
-        border: none;
-        cursor: pointer;
-        background: linear-gradient(
-          135deg,
-          var(--gold) 0%,
-          var(--goldBright) 100%
-        );
-        color: #130f07;
-        font-family: inherit;
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        transition:
-          filter 0.2s,
-          transform 0.15s,
-          box-shadow 0.2s;
-        box-shadow:
-          0 4px 20px rgba(216, 174, 110, 0.25),
-          inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      }
-      .btn-primary:hover {
-        filter: brightness(1.08);
-        transform: translateY(-1px);
-        box-shadow:
-          0 8px 30px rgba(216, 174, 110, 0.35),
-          inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      }
-      .btn-primary:active {
-        transform: translateY(0);
-        filter: brightness(0.96);
-      }
-
-      .btn-ghost {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 20px;
-        border-radius: var(--radius);
-        border: 1px solid var(--rim);
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--copy);
-        font-family: inherit;
-        font-size: 14px;
-        font-weight: 500;
-        transition:
-          background 0.2s,
-          border-color 0.2s,
-          transform 0.15s;
-      }
-      .btn-ghost:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.13);
-        transform: translateY(-1px);
-      }
-      .btn-ghost:active {
-        transform: translateY(0);
-      }
-
-      .btn-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
-        border: 1px solid var(--rim);
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--copy);
-        font-size: 17px;
-        transition:
-          background 0.2s,
-          border-color 0.2s,
-          transform 0.15s;
-      }
-      .btn-icon:hover {
-        background: rgba(255, 255, 255, 0.08);
-        transform: translateY(-1px);
-      }
-      .btn-icon.danger {
-        border-color: rgba(224, 90, 90, 0.2);
-        background: rgba(224, 90, 90, 0.08);
-        color: #f49090;
-      }
-      .btn-icon.danger:hover {
-        background: rgba(224, 90, 90, 0.14);
-      }
-
-      #keyScreen.active {
-        min-height: 100dvh;
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        padding: 24px 20px;
-      }
-
-      .key-wrapper {
-        display: grid;
-        gap: 28px;
-        width: 100%;
-        max-width: 1080px;
-      }
-      @media (min-width: 900px) {
-        .key-wrapper {
-          grid-template-columns: 1.15fr 0.85fr;
-          align-items: center;
-        }
-      }
-
-      .key-hero {
-        padding: 52px 48px;
-      }
-      .key-hero h1 {
-        font-family: "Cormorant Garamond", serif;
-        font-size: clamp(3rem, 6vw, 5.5rem);
-        font-weight: 600;
-        line-height: 1.05;
-        letter-spacing: -0.02em;
-        margin-top: 24px;
-        background: linear-gradient(160deg, #f3ede0 30%, var(--gold) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-      .key-hero p {
-        margin-top: 20px;
-        font-size: 16px;
-        color: var(--copyDim);
-        max-width: 420px;
-        line-height: 1.75;
-      }
-
-      .key-features {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        margin-top: 36px;
-      }
-      .key-feature {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-      }
-      .key-feature-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        flex-shrink: 0;
-        background: var(--goldGlow);
-        border: 1px solid rgba(216, 174, 110, 0.18);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-      }
-      .key-feature-text {
-        font-size: 14px;
-        color: var(--copyDim);
-      }
-      .key-feature-text strong {
-        color: var(--copy);
-        font-weight: 500;
-      }
-
-      .key-form-card {
-        padding: 40px 36px;
-      }
-      .key-form-card h2 {
-        font-family: "Cormorant Garamond", serif;
-        font-size: 2rem;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-      }
-      .key-form-card p {
-        margin-top: 6px;
-        font-size: 13px;
-        color: var(--copyDim);
-      }
-
-      .form-field {
-        display: grid;
-        gap: 8px;
-        margin-top: 24px;
-      }
-      .form-label {
-        font-size: 12px;
-        font-weight: 500;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: var(--copyDim);
-      }
-
-      .key-security {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 16px;
-        padding: 10px 14px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid var(--rim);
-        font-size: 12px;
-        color: var(--copyDim);
-      }
-      .key-security svg {
-        flex-shrink: 0;
-        opacity: 0.5;
-      }
-
-      #discoverScreen.active {
-        padding: 28px 20px 100px;
-        max-width: 1280px;
-        margin: 0 auto;
-        display: block !important;
-      }
-
-      .discover-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 32px;
-        flex-wrap: wrap;
-      }
-      .discover-header h1 {
-        font-family: "Cormorant Garamond", serif;
-        font-size: clamp(2.2rem, 4vw, 3.5rem);
-        font-weight: 600;
-        letter-spacing: -0.02em;
-        line-height: 1.1;
-        margin-top: 10px;
-      }
-
-      .search-wrap {
-        position: relative;
-        margin-bottom: 36px;
-      }
-      .search-wrap svg {
-        position: absolute;
-        left: 18px;
-        top: 50%;
-        transform: translateY(-50%);
-        opacity: 0.35;
-        pointer-events: none;
-      }
-      .search-wrap .input {
-        padding-left: 48px;
-      }
-
-      .section-label {
-        font-size: 11px;
-        font-weight: 500;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--copyDim);
-        margin-bottom: 20px;
-      }
-
-      #characterGrid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-      @media (min-width: 640px) {
-        #characterGrid {
-          gap: 18px;
-        }
-      }
-      @media (min-width: 900px) {
-        #characterGrid {
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 20px;
-        }
-      }
-
-      .char-card {
-        position: relative;
-        border-radius: var(--radiusLg);
-        overflow: hidden;
-        cursor: pointer;
-        aspect-ratio: 3 / 4;
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        transition:
-          transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-          box-shadow 0.3s,
-          border-color 0.3s;
-        animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-        text-align: left;
-        background: var(--surface);
-      }
-      .char-card:hover {
-        transform: translateY(-5px) scale(1.015);
-        border-color: rgba(216, 174, 110, 0.3);
-        box-shadow:
-          0 24px 60px rgba(0, 0, 0, 0.6),
-          0 0 0 1px rgba(216, 174, 110, 0.1);
-      }
-
-      .char-img {
-        position: absolute;
-        inset: 0;
-        background-size: cover;
-        background-position: center top;
-        transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-      }
-      .char-card:hover .char-img {
-        transform: scale(1.05);
-      }
-      .char-img::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          to top,
-          rgba(5, 7, 12, 0.97) 0%,
-          rgba(5, 7, 12, 0.75) 35%,
-          rgba(5, 7, 12, 0.15) 65%,
-          transparent 100%
-        );
-      }
-
-      .char-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 20px 16px 18px;
-        z-index: 2;
-      }
-      @media (min-width: 640px) {
-        .char-overlay {
-          padding: 24px 20px 22px;
-        }
-      }
-
-      .char-tag {
-        display: inline-block;
-        font-size: 9px;
-        font-weight: 600;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--gold);
-        margin-bottom: 5px;
-        opacity: 0.9;
-      }
-      @media (min-width: 640px) {
-        .char-tag {
-          font-size: 10px;
-          margin-bottom: 6px;
-        }
-      }
-
-      .char-name {
-        font-family: "Cormorant Garamond", serif;
-        font-size: 1.25rem;
-        font-weight: 600;
-        line-height: 1.15;
-        letter-spacing: -0.01em;
-        color: #f5f0e8;
-        margin-bottom: 6px;
-      }
-      @media (min-width: 640px) {
-        .char-name {
-          font-size: 1.55rem;
-          margin-bottom: 8px;
-        }
-      }
-
-      .char-desc {
-        font-size: 11px;
-        color: rgba(220, 215, 205, 0.65);
-        line-height: 1.6;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      @media (min-width: 640px) {
-        .char-desc {
-          font-size: 12.5px;
-        }
-      }
-
-      .char-body {
-        display: none;
-      }
-      .char-cta {
-        display: none;
-      }
-
-      #chatScreen.active {
-        padding: 0 16px;
-        max-width: 900px;
-        margin: 0 auto;
-        display: block !important;
-      }
-      #chatScreen:not(.active) #chatMessages {
-        display: none;
-      }
-
-      .chat-header {
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 16px 0 14px;
-        background: linear-gradient(to bottom, var(--ink) 70%, transparent);
-      }
-
-      .chat-char-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex: 1;
-        min-width: 0;
-      }
-      .chat-avatar {
-        width: 42px;
-        height: 42px;
-        border-radius: 14px;
-        flex-shrink: 0;
-        background-size: cover;
-        background-position: center top;
-        border: 1px solid var(--rimHot);
-        box-shadow: 0 0 20px rgba(216, 174, 110, 0.15);
-      }
-      .chat-char-name {
-        font-family: "Cormorant Garamond", serif;
-        font-size: 1.3rem;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .chat-char-scenario {
-        font-size: 12px;
-        color: var(--copyDim);
-      }
-
-      #chatMessages {
-        padding: 16px 0 120px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        overflow-y: auto;
-      }
-
-      .msg {
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-        animation: fadeUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
-        max-width: 82%;
-      }
-      .msg.user {
-        flex-direction: row-reverse;
-        align-self: flex-end;
-      }
-
-      .msg-avatar {
-        width: 34px;
-        height: 34px;
-        border-radius: 11px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        font-weight: 600;
-      }
-      .msg.assistant .msg-avatar {
-        background-size: cover;
-        background-position: center top;
-        background-color: var(--surfaceUp);
-        border: 1px solid var(--rimHot);
-      }
-      .msg.user .msg-avatar {
-        background: var(--goldGlow);
-        border: 1px solid rgba(216, 174, 110, 0.2);
-        color: var(--gold);
-      }
-
-      .msg-bubble {
-        padding: 13px 17px;
-        border-radius: 18px;
-        font-size: 14.5px;
-        line-height: 1.7;
-      }
-      .msg.assistant .msg-bubble {
-        background: var(--surfaceUp);
-        border: 1px solid var(--rim);
-        border-top-left-radius: 6px;
-        color: var(--copy);
-      }
-      .msg.user .msg-bubble {
-        background: linear-gradient(
-          135deg,
-          rgba(216, 174, 110, 0.2) 0%,
-          rgba(216, 174, 110, 0.12) 100%
-        );
-        border: 1px solid rgba(216, 174, 110, 0.2);
-        border-top-right-radius: 6px;
-        color: var(--copy);
-      }
-
-      .typing-indicator {
-        display: flex;
-        gap: 5px;
-        align-items: center;
-        padding: 14px 18px;
-      }
-      .typing-indicator span {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--copyDim);
-        animation: pulse 1.2s ease-in-out infinite;
-      }
-      .typing-indicator span:nth-child(2) {
-        animation-delay: 0.2s;
-      }
-      .typing-indicator span:nth-child(3) {
-        animation-delay: 0.4s;
-      }
-
-      .chat-input-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 30;
-        padding: 14px 16px max(14px, env(safe-area-inset-bottom));
-        background: linear-gradient(to top, var(--deep) 60%, transparent);
-      }
-      .chat-input-inner {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        max-width: 900px;
-        margin: 0 auto;
-        background: var(--surface);
-        border: 1px solid var(--rim);
-        border-radius: 20px;
-        padding: 8px 8px 8px 18px;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
-      }
-      .chat-input-inner:focus-within {
-        border-color: rgba(216, 174, 110, 0.4);
-        box-shadow:
-          0 8px 40px rgba(0, 0, 0, 0.5),
-          0 0 0 4px rgba(216, 174, 110, 0.07);
-      }
-      .chat-input-inner input {
-        flex: 1;
-        background: none;
-        border: none;
-        outline: none;
-        color: var(--copy);
-        font-family: inherit;
-        font-size: 15px;
-      }
-      .chat-input-inner input::placeholder {
-        color: var(--copyDim);
-      }
-
-      .chat-send {
-        width: 40px;
-        height: 40px;
-        flex-shrink: 0;
-        border-radius: 13px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(
-          135deg,
-          var(--gold) 0%,
-          var(--goldBright) 100%
-        );
-        border: none;
-        cursor: pointer;
-        color: #130f07;
-        font-size: 17px;
-        transition:
-          filter 0.2s,
-          transform 0.15s,
-          box-shadow 0.2s;
-        box-shadow: 0 2px 12px rgba(216, 174, 110, 0.3);
-      }
-      .chat-send:hover {
-        filter: brightness(1.1);
-        transform: scale(1.05);
-      }
-      .chat-send:active {
-        transform: scale(0.95);
-      }
-      .chat-send:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-        transform: none;
-      }
-
-      dialog {
-        background: transparent;
-        border: none;
-        padding: 0;
-        width: min(92vw, 460px);
-        color: var(--copy);
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        margin: 0;
+      /* Smooth Dialog Transitions */
+      dialog[open] {
+        animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
       dialog::backdrop {
-        background: rgba(4, 6, 10, 0.75);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        animation: fade-in 0.3s ease-out forwards;
       }
-
-      .dialog-inner {
-        background: rgba(13, 17, 26, 0.97);
-        border: 1px solid rgba(255, 255, 255, 0.09);
-        border-top: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: var(--radiusLg);
-        padding: 32px;
-        backdrop-filter: blur(40px);
-        -webkit-backdrop-filter: blur(40px);
-        box-shadow:
-          0 40px 100px rgba(0, 0, 0, 0.7),
-          0 0 0 1px rgba(255, 255, 255, 0.04);
-        animation: fadeUp 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+      @keyframes slide-up {
+        from {
+          opacity: 0;
+          transform: translateY(20px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
       }
-      .dialog-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 16px;
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
       }
-      .dialog-title {
-        font-family: "Cormorant Garamond", serif;
-        font-size: 1.9rem;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        margin-top: 8px;
-      }
-      .dialog-body {
-        margin-top: 24px;
-        display: grid;
-        gap: 18px;
-      }
-      .dialog-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 24px;
-        flex-wrap: wrap;
-      }
-
+      /* Custom Scrollbar for Chat */
       ::-webkit-scrollbar {
-        width: 5px;
+        width: 6px;
       }
       ::-webkit-scrollbar-track {
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
+        border-radius: 10px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.18);
-      }
-
-      .spinner {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        border: 2px solid rgba(216, 174, 110, 0.2);
-        border-top-color: var(--gold);
-        animation: spin 0.7s linear infinite;
-      }
-
-      .empty-state {
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 60px 20px;
-        color: var(--copyDim);
-      }
-      .empty-state-icon {
-        font-size: 3rem;
-        margin-bottom: 16px;
-        opacity: 0.4;
-      }
-      .empty-state h3 {
-        font-family: "Cormorant Garamond", serif;
-        font-size: 1.6rem;
-        color: var(--copy);
-      }
-      .empty-state p {
-        margin-top: 8px;
-        font-size: 14px;
+        background: rgba(255, 255, 255, 0.2);
       }
     </style>
   </head>
-  <body>
-    <div id="app">
-      <section id="keyScreen" class="screen active">
-        <div class="key-wrapper">
-          <div class="glass key-hero anim-fadeUp">
-            <span class="badge">Flower Roleplay</span>
-            <h1>Build worlds. Live stories.</h1>
-            <p>
-              An immersive workspace for AI-powered roleplay — connect your key
-              and step into any character's world.
-            </p>
-            <div class="key-features">
-              <div class="key-feature">
-                <div class="key-feature-icon">✦</div>
-                <div class="key-feature-text">
-                  <strong>Curated characters</strong> with rich backstories and
-                  unique voices
-                </div>
+
+  <body
+    class="min-h-screen bg-dark-900 text-white antialiased selection:bg-violet-500/30 selection:text-white"
+  >
+    <div id="app" class="min-h-screen">
+      <section
+        id="keyScreen"
+        class="relative hidden min-h-screen overflow-hidden bg-dark-900"
+      >
+        <div
+          class="pointer-events-none absolute -left-[20%] -top-[20%] h-[500px] w-[500px] rounded-full bg-violet-600/20 blur-[120px]"
+        ></div>
+        <div
+          class="pointer-events-none absolute -bottom-[20%] right-[10%] h-[400px] w-[400px] rounded-full bg-indigo-600/10 blur-[100px]"
+        ></div>
+
+        <div
+          class="pointer-events-none absolute inset-y-0 right-0 w-full lg:w-[68%]"
+        >
+          <div
+            class="absolute inset-0 bg-cover bg-center"
+            style="background-image: url(&quot;images/bg.png&quot;)"
+          ></div>
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-dark-900 via-dark-900/90 via-45% to-transparent"
+          ></div>
+          <div
+            class="absolute inset-0 bg-gradient-to-t from-dark-900/90 via-transparent to-dark-900/30"
+          ></div>
+        </div>
+
+        <div
+          class="pointer-events-none absolute inset-0 bg-dark-900/60 lg:hidden"
+        ></div>
+
+        <div class="relative z-10 flex min-h-screen w-full items-center">
+          <div class="w-full px-7 py-10 sm:px-12 lg:w-[58%] lg:px-16 xl:px-24">
+            <div
+              class="absolute left-8 top-8 sm:left-12 sm:top-10 lg:left-16 xl:left-24"
+            >
+              <div class="text-3xl font-bold">
+                Roleplay<span
+                  class="bg-gradient-to-r from-violet-400 to-indigo-500 bg-clip-text text-transparent"
+                  >AI</span
+                >
               </div>
-              <div class="key-feature">
-                <div class="key-feature-icon">⌭</div>
-                <div class="key-feature-text">
-                  <strong>Focused chat interface</strong> — no distractions,
-                  pure immersion
-                </div>
-              </div>
-              <div class="key-feature">
-                <div class="key-feature-icon">⚿</div>
-                <div class="key-feature-text">
-                  <strong>Your key stays local</strong> — never sent to any
-                  third-party servers
-                </div>
+              <div
+                class="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.45em] text-zinc-500"
+              >
+                Real people. New stories.
               </div>
             </div>
+
+            <div class="mx-auto w-full max-w-[620px] pt-24 lg:mx-0 lg:pt-12">
+              <h1 class="font-light text-6xl">
+                Talk.<br />
+                Roleplay.<br />
+                Be
+                <span
+                  class="bg-gradient-to-r from-violet-400 to-indigo-500 bg-clip-text font-medium text-transparent"
+                  >Anyone.</span
+                >
+              </h1>
+
+              <p class="mt-8 leading-relaxed text-zinc-400">
+                Immersive AI characters. Infinite possibilities.<br
+                  class="hidden sm:block"
+                />
+                Securely powered by your own API key.
+              </p>
+
+              <form id="keyForm" class="mt-10 w-full">
+                <div class="relative group">
+                  <div class="relative relative">
+                    <input
+                      id="apiKeyInput"
+                      type="password"
+                      autocomplete="off"
+                      required
+                      placeholder="Enter your API key"
+                      class="h-14 w-full rounded border border-white/10 bg-dark-700/50 p-4 text-md text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-zinc-600 hover:border-white/20 hover:bg-dark-700/80 focus:border-violet-500/50 focus:bg-white/[0.04] focus:ring-4 focus:ring-violet-500/10"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  class="mt-5 h-14 w-full p-4 gap-4 rounded bg-gradient-to-r from-violet-600 to-indigo-600 text-md font-semibold tracking-wide shadow-[0_12px_45px_rgba(124,58,237,0.25)] transition-all duration-300 hover:shadow-[0_15px_55px_rgba(124,58,237,0.4)] active:scale-[0.98]"
+                >
+                  Continue
+                </button>
+              </form>
+            </div>
           </div>
-          <div class="glass key-form-card anim-fadeUp-2">
-            <h2>Connect your key</h2>
-            <p>Enter your Pollinations API key to get started.</p>
-            <form id="keyForm">
-              <div class="form-field">
-                <label class="form-label" for="apiKeyInput">API Key</label>
+        </div>
+      </section>
+
+      <!-- DISCOVER SCREEN -->
+      <section
+        id="discoverScreen"
+        class="hidden min-h-screen bg-dark-900 relative"
+      >
+        <!-- Ambient Background -->
+        <div
+          class="pointer-events-none absolute right-0 top-0 h-[600px] w-[600px] rounded-full bg-violet-900/10 blur-[150px]"
+        ></div>
+
+        <div
+          class="mx-auto max-w-[1500px] px-6 py-8 sm:px-10 lg:px-12 relative z-10"
+        >
+          <header class="flex items-center justify-between">
+            <div>
+              <div class="text-3xl font-bold">
+                Roleplay<span
+                  class="bg-gradient-to-r from-violet-400 to-indigo-500 bg-clip-text text-transparent"
+                  >AI</span
+                >
+              </div>
+              <div
+                class="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.45em] text-zinc-500"
+              >
+                Real people. New stories.
+              </div>
+            </div>
+
+            <button
+              id="openSettingsButton"
+              type="button"
+              class="flex h-11 w-11 items-center justify-center rounded-full bg-dark-700/80 border border-white/5 text-zinc-400 shadow-sm transition-all hover:bg-white/10 hover:text-white active:scale-95"
+            >
+              <i class="fa-solid fa-gear"></i>
+            </button>
+          </header>
+
+          <div class="mt-16">
+            <h1 class="text-5xl font-light">
+              Find your
+              <span
+                class="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text font-medium text-transparent"
+                >Story.</span
+              >
+            </h1>
+
+            <div class="mt-10 w-full max-w-[700px]">
+              <div class="relative group">
                 <input
-                  id="apiKeyInput"
-                  class="input"
-                  type="password"
-                  placeholder="pk_... or sk_..."
-                  autocomplete="off"
-                  required
+                  id="searchInput"
+                  type="text"
+                  placeholder="Search characters, worlds, or scenarios..."
+                  class="h-14 w-full rounded border border-white/10 bg-dark-800/80 p-4 outline-none backdrop-blur-xl transition-all placeholder:text-zinc-500 focus:border-violet-500/50 focus:bg-dark-700 focus:shadow-[0_0_30px_rgba(124,58,237,0.1)]"
                 />
               </div>
-              <div style="margin-top: 18px">
-                <button class="btn-primary" type="submit" style="width: 100%">
-                  Continue
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path
-                      d="M3 8h10M9 4l4 4-4 4"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <div class="key-security">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path
-                    d="M7 1l4.5 2v3.5C11.5 10 7 13 7 13S2.5 10 2.5 6.5V3L7 1z"
-                    stroke="currentColor"
-                    stroke-width="1.3"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-                Stored only in your browser's local storage — never transmitted.
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
+            </div>
 
-      <section id="discoverScreen" class="screen">
-        <div class="discover-header anim-fadeUp">
-          <div>
-            <span class="badge">Flower Roleplay</span>
-            <h1>Choose your story</h1>
-          </div>
-          <button id="openSettingsButton" class="btn-ghost" type="button">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <circle
-                cx="8"
-                cy="8"
-                r="2"
-                stroke="currentColor"
-                stroke-width="1.5"
-              />
-              <path
-                d="M8 1v2M8 13v2M1 8h2M13 8h2M2.93 2.93l1.41 1.41M11.66 11.66l1.41 1.41M2.93 13.07l1.41-1.41M11.66 4.34l1.41-1.41"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-              />
-            </svg>
-          </button>
-        </div>
-        <div class="search-wrap anim-fadeUp-2">
-          <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-            <circle
-              cx="7.5"
-              cy="7.5"
-              r="5.5"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-            <path
-              d="M11.5 11.5L15 15"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-            />
-          </svg>
-          <input
-            id="searchInput"
-            class="input"
-            type="text"
-            placeholder="Search characters, scenarios…"
-            autocomplete="off"
-          />
-        </div>
-        <p class="section-label anim-fadeUp-3">Available characters</p>
-        <div id="characterGrid"></div>
-      </section>
+            <div class="mt-12">
+              <div class="mb-6 flex items-end justify-between">
+                <h2 class="text-2xl font-semibold">Featured</h2>
+              </div>
 
-      <section id="chatScreen" class="screen">
-        <div class="chat-header">
-          <button
-            id="backButton"
-            class="btn-icon"
-            type="button"
-            aria-label="Go back"
-          >
-            <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-              <path
-                d="M10 3L4 8.5L10 14"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
-          <div class="chat-char-info">
-            <div id="chatAvatar" class="chat-avatar"></div>
-            <div>
-              <div id="chatCharName" class="chat-char-name"></div>
-              <div id="chatCharScenario" class="chat-char-scenario"></div>
+              <!-- Character Grid -->
+              <div
+                id="characterGrid"
+                class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+              >
+                <!-- Characters get injected here via JS, using the template below -->
+              </div>
             </div>
           </div>
-          <button
-            id="resetChatButton"
-            class="btn-icon danger"
-            type="button"
-            aria-label="Reset chat"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M2 8a6 6 0 1 0 1-3.3"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-              />
-              <path
-                d="M2 3v2.7H4.7"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
-          <button
-            id="chatSettingsButton"
-            class="btn-icon"
-            type="button"
-            aria-label="Settings"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <circle
-                cx="8"
-                cy="8"
-                r="2"
-                stroke="currentColor"
-                stroke-width="1.5"
-              />
-              <path
-                d="M8 1v2M8 13v2M1 8h2M13 8h2M2.93 2.93l1.41 1.41M11.66 11.66l1.41 1.41M2.93 13.07l1.41-1.41M11.66 4.34l1.41-1.41"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-              />
-            </svg>
-          </button>
         </div>
-        <div id="chatMessages" aria-live="polite"></div>
-        <div class="chat-input-bar">
-          <form id="chatForm">
-            <div class="chat-input-inner">
-              <input
-                id="chatInput"
-                type="text"
-                placeholder="Write your next move…"
-                autocomplete="off"
-              />
+      </section>
+
+      <!-- CHAT SCREEN -->
+      <section id="chatScreen" class="hidden min-h-screen bg-dark-900">
+        <div class="flex min-h-screen">
+          <!-- Sidebar -->
+          <aside
+            class="hidden w-[360px] shrink-0 border-r border-white/10 bg-dark-800/40 backdrop-blur-2xl lg:flex lg:flex-col relative z-20"
+          >
+            <div
+              class="flex items-center justify-between p-7 absolute top-0 w-full z-10"
+            >
               <button
-                id="sendButton"
-                class="chat-send"
-                type="submit"
-                aria-label="Send"
+                id="backButton"
+                type="button"
+                class="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 border border-white/10 text-zinc-300 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M2 8h12M8 2l6 6-6 6"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
+                <i class="fa-solid fa-chevron-left"></i>
               </button>
             </div>
-          </form>
+
+            <div class="relative h-[480px] overflow-hidden">
+              <div
+                id="chatAvatar"
+                class="absolute inset-0 bg-cover bg-center transition-transform duration-1000 scale-105"
+                style="
+                  background-image: url(&quot;https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop&quot;);
+                "
+              ></div>
+              <!-- Smoother gradient fade -->
+              <div
+                class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/60 to-transparent"
+              ></div>
+            </div>
+
+            <div class="px-8 pb-8 relative -mt-20 z-10 flex-1 flex flex-col">
+              <div
+                class="mb-4 h-1 w-12 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 shadow-[0_0_15px_rgba(124,58,237,0.5)]"
+              ></div>
+              <h1
+                id="chatCharName"
+                class="text-4xl font-semibold tracking-tight text-white drop-shadow-md"
+              >
+                Sarah
+              </h1>
+              <p
+                id="chatCharScenario"
+                class="mt-3 text-sm leading-relaxed text-zinc-400"
+              >
+                A brilliant but cynical private investigator working in a
+                cyberpunk metropolis. She trusts no one, especially not you.
+              </p>
+            </div>
+          </aside>
+
+          <!-- Chat Area -->
+          <main
+            class="flex min-w-0 flex-1 flex-col relative bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-violet-900/10 via-dark-900 to-dark-900"
+          >
+            <!-- Mobile Header -->
+            <header
+              class="flex h-[80px] shrink-0 items-center border-b border-white/[0.04] bg-dark-900/60 backdrop-blur-xl px-5 sm:px-8 z-20"
+            >
+              <button
+                type="button"
+                class="flex h-11 w-11 items-center justify-center rounded-full border border-white/5 bg-dark-700/50 text-zinc-400 lg:hidden hover:bg-white/10 hover:text-white"
+                onclick="document.getElementById('backButton')?.click()"
+              >
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+
+              <div class="ml-4 lg:hidden">
+                <h2 class="font-medium">Sarah</h2>
+                <p class="text-[11px] text-zinc-500">Cyberpunk Detective</p>
+              </div>
+
+              <div class="ml-auto flex gap-2">
+                <button
+                  id="resetChatButton"
+                  type="button"
+                  class="flex h-11 w-11 items-center justify-center rounded-full bg-dark-700/30 text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                  title="Reset Conversation"
+                >
+                  <i class="fa-solid fa-rotate-right"></i>
+                </button>
+
+                <button
+                  id="chatSettingsButton"
+                  type="button"
+                  class="flex h-11 w-11 items-center justify-center rounded-full bg-dark-700/30 text-zinc-500 transition-colors hover:bg-white/10 hover:text-white"
+                  title="Chat Settings"
+                >
+                  <i class="fa-solid fa-sliders"></i>
+                </button>
+              </div>
+            </header>
+
+            <!-- Messages Stream -->
+            <div
+              id="chatMessages"
+              class="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 overflow-y-auto px-5 py-8 pb-40 sm:px-8 scroll-smooth"
+            >
+              <!-- Sample Message -->
+              <div class="flex gap-4 self-start max-w-[85%]">
+                <div
+                  class="h-8 w-8 rounded-full bg-zinc-800 bg-cover bg-center shrink-0 mt-1"
+                  style="
+                    background-image: url(&quot;https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop&quot;);
+                  "
+                ></div>
+                <div
+                  class="rounded-2xl rounded-tl-sm bg-dark-700/80 border border-white/5 px-5 py-4 text-[15px] leading-relaxed text-zinc-200"
+                >
+                  You're late. I told you to meet me at the neon district before
+                  the patrol drones started their sweep. What's your excuse?
+                </div>
+              </div>
+            </div>
+
+            <!-- Floating Input Console -->
+            <div
+              class="absolute bottom-0 left-0 right-0 z-30 pointer-events-none"
+            >
+              <!-- Gradient fade to hide text clipping -->
+              <div
+                class="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-dark-900 via-dark-900/80 to-transparent"
+              ></div>
+
+              <div
+                class="relative mx-auto max-w-4xl px-4 pb-6 sm:px-8 pointer-events-auto"
+              >
+                <form id="chatForm">
+                  <div
+                    class="flex items-center gap-2 rounded-[28px] border border-white/10 bg-dark-800/80 p-2 pl-4 pr-2 shadow-[0_20px_40px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all focus-within:border-violet-500/30 focus-within:bg-dark-800/95 focus-within:shadow-[0_20px_40px_rgba(124,58,237,0.15)]"
+                  >
+                    <button
+                      type="button"
+                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+                      title="Attach"
+                    >
+                      <i class="fa-solid fa-paperclip"></i>
+                    </button>
+
+                    <input
+                      id="chatInput"
+                      type="text"
+                      placeholder="Type your reply..."
+                      class="min-w-0 flex-1 bg-transparent px-2 py-3 text-[15px] text-white outline-none placeholder:text-zinc-500"
+                      autocomplete="off"
+                    />
+
+                    <button
+                      id="sendButton"
+                      type="submit"
+                      class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 shadow-md transition-all hover:scale-105 active:scale-95"
+                    >
+                      <i class="fa-solid fa-arrow-up text-white"></i>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </main>
         </div>
       </section>
+
+      <!-- SETTINGS DIALOG -->
+      <dialog
+        id="settingsDialog"
+        class="w-[calc(100%-32px)] max-w-md rounded border border-white/10 bg-dark-800 p-0 text-white shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm m-auto"
+      >
+        <div class="p-7">
+          <div class="flex items-center justify-between">
+            <div>
+              <p
+                class="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-400"
+              >
+                Configuration
+              </p>
+              <h2 class="mt-1 text-2xl font-semibold tracking-tight">
+                API Key
+              </h2>
+            </div>
+            <button
+              id="closeSettingsBtn"
+              type="button"
+              class="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div class="mt-8">
+            <div class="relative">
+              <i
+                class="fa-solid fa-key absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500"
+              ></i>
+              <input
+                id="settingsApiKeyInput"
+                type="password"
+                placeholder="sk-..."
+                class="w-full rounded-2xl border border-white/10 bg-dark-900/50 py-4 pl-12 pr-4 text-[15px] outline-none transition-all placeholder:text-zinc-600 focus:border-violet-500/50 focus:bg-dark-900"
+              />
+            </div>
+            <p class="mt-3 text-xs text-zinc-500 ml-1">
+              Your key is stored locally and never sent to our servers.
+            </p>
+          </div>
+
+          <div class="mt-8 flex gap-3">
+            <button
+              id="saveSettingsButton"
+              type="button"
+              class="flex-1 rounded bg-white px-5 py-3.5 text-[15px] font-semibold text-dark-900 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Save Changes
+            </button>
+            <button
+              id="clearKeyButton"
+              type="button"
+              class="rounded border border-white/10 bg-dark-700/50 px-6 py-3.5 text-[15px] font-medium text-red-400 transition-colors hover:bg-red-500/10 hover:border-red-500/20"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      </dialog>
+
+      <!-- RESET DIALOG -->
+      <dialog
+        id="resetDialog"
+        class="w-[calc(100%-32px)] max-w-md rounded-[28px] border border-white/10 bg-dark-800 p-0 text-white shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm m-auto"
+      >
+        <div class="p-7">
+          <div
+            class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-red-500/10 text-red-400"
+          >
+            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+          </div>
+
+          <div class="text-center">
+            <h2 class="text-2xl font-semibold tracking-tight">
+              Reset Conversation?
+            </h2>
+            <p class="mt-3 text-[15px] leading-relaxed text-zinc-400">
+              This will permanently erase the current story with this character.
+              You cannot undo this action.
+            </p>
+          </div>
+
+          <div class="mt-8 flex gap-3">
+            <button
+              id="cancelResetButton"
+              type="button"
+              class="flex-1 rounded-2xl border border-white/10 bg-dark-700/50 py-3.5 text-[15px] font-medium text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              id="confirmResetButton"
+              type="button"
+              class="flex-1 rounded-2xl bg-red-500 py-3.5 text-[15px] font-semibold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Yes, Reset
+            </button>
+          </div>
+        </div>
+      </dialog>
+
+      <!-- CHARACTER CARD TEMPLATE -->
+      <template id="characterCardTemplate">
+        <button
+          type="button"
+          class="group relative aspect-[3/4] w-full overflow-hidden rounded border border-white/5 bg-dark-800 text-left transition-all duration-300 hover:-translate-y-1.5 hover:border-violet-500/40 hover:shadow-[0_15px_30px_rgba(124,58,237,0.15)]"
+        >
+          <!-- Background image container -->
+          <div
+            class="char-img absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+          ></div>
+
+          <!-- Gradient overlay -->
+          <div
+            class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/40 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100"
+          ></div>
+
+          <!-- Content -->
+          <div
+            class="absolute inset-x-0 bottom-0 flex flex-col justify-end p-5 h-full"
+          >
+            <div
+              class="translate-y-2 transition-transform duration-300 group-hover:translate-y-0"
+            >
+              <span
+                class="char-tag inline-block rounded-full border border-violet-500/20 bg-violet-500/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-violet-300 backdrop-blur-md"
+              ></span>
+              <h3
+                class="char-name mt-2 text-xl font-semibold tracking-tight text-white drop-shadow-md"
+              ></h3>
+              <p
+                class="char-desc mt-1.5 line-clamp-2 text-[13px] leading-snug text-zinc-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              ></p>
+            </div>
+          </div>
+        </button>
+      </template>
     </div>
 
-    <dialog id="settingsDialog">
-      <div class="dialog-inner">
-        <div class="dialog-header">
-          <div>
-            <span class="badge">Configuration</span>
-            <h2 class="dialog-title">API Settings</h2>
-          </div>
-          <button
-            class="btn-ghost"
-            id="closeSettingsBtn"
-            type="button"
-            style="padding: 10px 14px"
-          >
-            ✕
-          </button>
-        </div>
-        <div class="dialog-body">
-          <div class="form-field">
-            <label class="form-label" for="settingsApiKeyInput"
-              >Saved Key</label
-            >
-            <input
-              id="settingsApiKeyInput"
-              class="input"
-              type="password"
-              placeholder="Update your key"
-            />
-          </div>
-        </div>
-        <div class="dialog-actions">
-          <button id="saveSettingsButton" class="btn-primary" type="button">
-            Save changes
-          </button>
-          <button id="clearKeyButton" class="btn-ghost" type="button">
-            Clear key
-          </button>
-        </div>
-      </div>
-    </dialog>
+    <!-- Screen Management Logic (Preserved from original) -->
+    <script>
+      const screens = [
+        document.getElementById("keyScreen"),
+        document.getElementById("discoverScreen"),
+        document.getElementById("chatScreen"),
+      ];
 
-    <dialog id="resetDialog">
-      <div class="dialog-inner">
-        <div class="dialog-header">
-          <div>
-            <span
-              class="badge"
-              style="
-                background: rgba(224, 90, 90, 0.1);
-                border-color: rgba(224, 90, 90, 0.2);
-                color: #f49090;
-              "
-              >Warning</span
-            >
-            <h2 class="dialog-title">Reset Conversation</h2>
-          </div>
-          <button
-            class="btn-ghost"
-            id="closeResetBtn"
-            type="button"
-            style="padding: 10px 14px"
-          >
-            ✕
-          </button>
-        </div>
-        <div class="dialog-body">
-          <p style="color: var(--copyDim); line-height: 1.75; font-size: 14px">
-            This will erase the current conversation and restart the scenario
-            from the beginning. This action cannot be undone.
-          </p>
-        </div>
-        <div class="dialog-actions">
-          <button
-            id="confirmResetButton"
-            class="btn-primary"
-            type="button"
-            style="
-              background: linear-gradient(135deg, #c04040, #e06060);
-              box-shadow: 0 4px 20px rgba(200, 60, 60, 0.25);
-            "
-          >
-            Reset conversation
-          </button>
-          <button id="cancelResetButton" class="btn-ghost" type="button">
-            Cancel
-          </button>
-        </div>
-      </div>
-    </dialog>
+      const updateScreens = () => {
+        screens.forEach((screen) => {
+          if (!screen) return;
+          const active = screen.classList.contains("active");
+          screen.classList.toggle("hidden", !active);
+          if (screen.id === "keyScreen") {
+            screen.classList.toggle("flex", active);
+          }
+        });
+      };
 
-    <template id="characterCardTemplate">
-      <button class="char-card" type="button">
-        <div class="char-img"></div>
-        <div class="char-overlay">
-          <span class="char-tag"></span>
-          <h3 class="char-name"></h3>
-          <p class="char-desc"></p>
-        </div>
-      </button>
-    </template>
+      const observer = new MutationObserver(updateScreens);
+      screens.forEach((screen) => {
+        if (!screen) return;
+        observer.observe(screen, {
+          attributes: true,
+          attributeFilter: ["class"],
+        });
+      });
 
-    <script src="app.js"></script>
+      updateScreens();
+    </script>
+
+    <!-- Keep your external script reference -->
+    <script src="script.js"></script>
   </body>
 </html>

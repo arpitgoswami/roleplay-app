@@ -1,3 +1,5 @@
+<img width="1447" height="837" alt="image" src="https://github.com/user-attachments/assets/1cb6791b-c6ba-48a0-b04b-1c7aaa3aed8b" />
+
 # Roleplay Application
 
 ## Overview

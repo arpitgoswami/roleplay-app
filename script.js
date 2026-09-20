@@ -512,7 +512,7 @@ async function generateCharacterReply(character, conversation) {
           Authorization: `Bearer ${state.apiKey}`,
         },
         body: JSON.stringify({
-          model: "openai",
+          model: "openai/gpt-5.4-nano",
           messages,
           temperature: 0.9,
           private: true,

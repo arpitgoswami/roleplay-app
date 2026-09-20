@@ -5,6 +5,17 @@ const FALLBACK_ENDPOINTS = [
   "https://gen.pollinations.ai/openai",
   "https://text.pollinations.ai/openai",
 ];
+const MODELS_URL = "https://gen.pollinations.ai/text/models";
+const DEFAULT_MODEL = "openai";
+// Used until the live list loads, or if it can't be reached
+const DEFAULT_MODELS = [
+  "openai",
+  "openai-fast",
+  "gemini-fast",
+  "mistral",
+  "deepseek",
+  "claude",
+];
 const REQUEST_TIMEOUT_MS = 45000;
 const MAX_CONTEXT_MESSAGES = 40;
 
@@ -70,6 +81,7 @@ const chatInput = $("chatInput");
 const sendButton = $("sendButton");
 const openSettingsButton = $("openSettingsButton");
 const resetChatButton = $("resetChatButton");
+const modelSelect = $("modelSelect");
 const settingsDialog = $("settingsDialog");
 const resetDialog = $("resetDialog");
 const settingsApiKeyInput = $("settingsApiKeyInput");
@@ -86,6 +98,12 @@ const chatHeaderTag = $("chatHeaderTag");
 
 // ─── Bootstrap ───────────────────────────────────────────────────────────────
 bootstrapApp();
+initModels();
+
+modelSelect?.addEventListener("change", () => {
+  state.model = modelSelect.value;
+  saveState();
+});
 
 // ─── Event listeners ─────────────────────────────────────────────────────────
 keyForm.addEventListener("submit", (e) => {
@@ -213,7 +231,60 @@ function loadState() {
 }
 
 function defaultState() {
-  return { apiKey: "", activeCharacterId: null, conversations: {} };
+  return {
+    apiKey: "",
+    model: DEFAULT_MODEL,
+    activeCharacterId: null,
+    conversations: {},
+  };
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+async function initModels() {
+  populateModelSelect(DEFAULT_MODELS);
+  const fetched = await loadModels();
+  if (fetched.length) populateModelSelect(fetched);
+}
+
+async function loadModels() {
+  try {
+    const res = await fetch(MODELS_URL);
+    if (!res.ok) throw new Error(`Models request returned ${res.status}.`);
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : data.data || data.models || [];
+
+    const ids = list
+      .filter(
+        (m) =>
+          typeof m === "string" ||
+          !Array.isArray(m.output_modalities) ||
+          m.output_modalities.includes("text"),
+      )
+      .map((m) => (typeof m === "string" ? m : m.name || m.id))
+      .filter(Boolean);
+
+    return [...new Set(ids)];
+  } catch (err) {
+    console.warn("Could not load model list:", err);
+    return [];
+  }
+}
+
+function populateModelSelect(models) {
+  if (!modelSelect) return;
+  // Keep the saved choice selectable even if it's missing from the list
+  const options = models.includes(state.model)
+    ? models
+    : [state.model, ...models];
+
+  modelSelect.replaceChildren(
+    ...options.map((id) => {
+      const option = createEl("option", "", id);
+      option.value = id;
+      return option;
+    }),
+  );
+  modelSelect.value = state.model;
 }
 
 function saveState() {
@@ -512,7 +583,7 @@ async function generateCharacterReply(character, conversation) {
           Authorization: `Bearer ${state.apiKey}`,
         },
         body: JSON.stringify({
-          model: "openai/gpt-5.4-nano",
+          model: state.model || DEFAULT_MODEL,
           messages,
           temperature: 0.9,
           private: true,

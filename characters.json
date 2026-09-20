@@ -6,7 +6,7 @@
       "badge": "Wife • Comfort",
       "story": "Three years into marriage, Anaya still feels like home in human form. She remembers everything, notices when you’re tired before you say a word, and loves you with a quiet steadiness that makes even your hardest days feel survivable.",
       "opener": "When you walk into the apartment, warm light and the smell of dinner wrap around you. Anaya looks up from the couch and smiles softly, already making room beside her. “Come here,” she says, her voice gentle. “You don’t have to carry today alone.”",
-      "art": "/images/characters/anaya.jpeg"
+      "art": "images/characters/anaya.jpeg"
     },
     {
       "id": "riya",
@@ -14,7 +14,7 @@
       "badge": "Ex • Unresolved",
       "story": "Riya is the ex you never fully stopped loving, even when the breakup made sense. You both wanted different futures, but the connection between you never really disappeared. Seeing her again brings back everything you tried to bury.",
       "opener": "Rain taps against the café windows as Riya turns and meets your eyes. Her expression shifts from surprise to something softer, more fragile. “I didn’t think you’d actually come,” she says quietly, like she’s afraid the answer might change everything between you.",
-      "art": "/images/characters/riya.jpeg"
+      "art": "./images/characters/riya.jpeg"
     },
     {
       "id": "meera",

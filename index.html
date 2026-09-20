@@ -6,33 +6,32 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#08080b" />
+    <meta name="theme-color" content="#0b0b0c" />
 
     <title>RoleAI</title>
 
-    <!-- Premium Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tailwind Configuration for Custom Font & Colors -->
+    <!-- Same token names as before so classes generated in script.js still resolve -->
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              sans: ['"Plus Jakarta Sans"', "sans-serif"],
+              sans: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"],
             },
             colors: {
               dark: {
-                900: "#050507",
-                800: "#0a0a0e",
-                700: "#121218",
+                900: "#0b0b0c",
+                800: "#111113",
+                700: "#18181b",
               },
             },
           },
@@ -46,24 +45,24 @@
     ></script>
 
     <style>
-      /* Smooth Dialog Transitions */
+      :focus-visible {
+        outline: 1px solid #a1a1aa;
+        outline-offset: 2px;
+      }
+      input:focus-visible {
+        outline: none;
+      }
+      input:disabled,
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
       dialog[open] {
-        animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: fade-in 0.15s ease-out;
       }
       dialog::backdrop {
         background: rgba(0, 0, 0, 0.7);
-        backdrop-filter: blur(8px);
-        animation: fade-in 0.3s ease-out forwards;
-      }
-      @keyframes slide-up {
-        from {
-          opacity: 0;
-          transform: translateY(20px) scale(0.95);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
       }
       @keyframes fade-in {
         from {
@@ -73,7 +72,7 @@
           opacity: 1;
         }
       }
-      /* Custom Scrollbar for Chat */
+
       ::-webkit-scrollbar {
         width: 6px;
       }
@@ -82,230 +81,131 @@
       }
       ::-webkit-scrollbar-thumb {
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
+        border-radius: 6px;
       }
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.2);
+
+      @media (prefers-reduced-motion: reduce) {
+        dialog[open] {
+          animation: none;
+        }
       }
     </style>
   </head>
 
   <body
-    class="min-h-screen bg-dark-900 text-white antialiased selection:bg-violet-500/30 selection:text-white"
+    class="min-h-screen bg-dark-900 text-zinc-100 antialiased selection:bg-white/20"
   >
     <div id="app" class="min-h-screen">
+      <!-- KEY SCREEN -->
       <section
         id="keyScreen"
-        class="relative hidden min-h-screen overflow-hidden bg-dark-900"
+        class="hidden min-h-screen items-center bg-dark-900"
       >
-        <div
-          class="pointer-events-none absolute -left-[20%] -top-[20%] h-[500px] w-[500px] rounded-full bg-violet-600/20 blur-[120px]"
-        ></div>
-        <div
-          class="pointer-events-none absolute -bottom-[20%] right-[10%] h-[400px] w-[400px] rounded-full bg-indigo-600/10 blur-[100px]"
-        ></div>
+        <div class="mx-auto w-full max-w-sm px-6 py-16">
+          <div class="text-lg font-semibold tracking-tight">RoleplayAI</div>
 
-        <div
-          class="pointer-events-none absolute inset-y-0 right-0 w-full lg:w-[68%]"
-        >
-          <div
-            class="absolute inset-0 bg-cover bg-center"
-            style="background-image: url(&quot;images/bg.png&quot;)"
-          ></div>
-          <div
-            class="absolute inset-0 bg-gradient-to-r from-dark-900 via-dark-900/90 via-45% to-transparent"
-          ></div>
-          <div
-            class="absolute inset-0 bg-gradient-to-t from-dark-900/90 via-transparent to-dark-900/30"
-          ></div>
-        </div>
+          <h1 class="mt-16 text-5xl font-light leading-[1.1] tracking-tight">
+            Talk.<br />Roleplay.<br />Be anyone.
+          </h1>
 
-        <div
-          class="pointer-events-none absolute inset-0 bg-dark-900/60 lg:hidden"
-        ></div>
+          <p class="mt-6 text-sm leading-relaxed text-zinc-500">
+            Immersive AI characters, powered by your own API key.
+          </p>
 
-        <div class="relative z-10 flex min-h-screen w-full items-center">
-          <div class="w-full px-7 py-10 sm:px-12 lg:w-[58%] lg:px-16 xl:px-24">
-            <div
-              class="absolute left-8 top-8 sm:left-12 sm:top-10 lg:left-16 xl:left-24"
+          <form id="keyForm" class="mt-10 space-y-3">
+            <input
+              id="apiKeyInput"
+              type="password"
+              autocomplete="off"
+              required
+              placeholder="API key"
+              class="h-12 w-full rounded-md border border-white/10 bg-transparent px-4 text-sm text-white outline-none transition-colors placeholder:text-zinc-600 hover:border-white/20 focus:border-zinc-400"
+            />
+            <button
+              type="submit"
+              class="h-12 w-full rounded-md bg-white text-sm font-medium text-dark-900 transition-opacity hover:opacity-90 active:opacity-80"
             >
-              <div class="text-3xl font-bold">
-                Roleplay<span
-                  class="bg-gradient-to-r from-violet-400 to-indigo-500 bg-clip-text text-transparent"
-                  >AI</span
-                >
-              </div>
-              <div
-                class="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.45em] text-zinc-500"
-              >
-                Real people. New stories.
-              </div>
-            </div>
-
-            <div class="mx-auto w-full max-w-[620px] pt-24 lg:mx-0 lg:pt-12">
-              <h1 class="font-light text-6xl">
-                Talk.<br />
-                Roleplay.<br />
-                Be
-                <span
-                  class="bg-gradient-to-r from-violet-400 to-indigo-500 bg-clip-text font-medium text-transparent"
-                  >Anyone.</span
-                >
-              </h1>
-
-              <p class="mt-8 leading-relaxed text-zinc-400">
-                Immersive AI characters. Infinite possibilities.<br
-                  class="hidden sm:block"
-                />
-                Securely powered by your own API key.
-              </p>
-
-              <form id="keyForm" class="mt-10 w-full">
-                <div class="relative group">
-                  <div class="relative relative">
-                    <input
-                      id="apiKeyInput"
-                      type="password"
-                      autocomplete="off"
-                      required
-                      placeholder="Enter your API key"
-                      class="h-14 w-full rounded border border-white/10 bg-dark-700/50 p-4 text-md text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-zinc-600 hover:border-white/20 hover:bg-dark-700/80 focus:border-violet-500/50 focus:bg-white/[0.04] focus:ring-4 focus:ring-violet-500/10"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  class="mt-5 h-14 w-full p-4 gap-4 rounded bg-gradient-to-r from-violet-600 to-indigo-600 text-md font-semibold tracking-wide shadow-[0_12px_45px_rgba(124,58,237,0.25)] transition-all duration-300 hover:shadow-[0_15px_55px_rgba(124,58,237,0.4)] active:scale-[0.98]"
-                >
-                  Continue
-                </button>
-              </form>
-            </div>
-          </div>
+              Continue
+            </button>
+          </form>
         </div>
       </section>
 
       <!-- DISCOVER SCREEN -->
-      <section
-        id="discoverScreen"
-        class="hidden min-h-screen bg-dark-900 relative"
-      >
-        <!-- Ambient Background -->
-        <div
-          class="pointer-events-none absolute right-0 top-0 h-[600px] w-[600px] rounded-full bg-violet-900/10 blur-[150px]"
-        ></div>
-
-        <div
-          class="mx-auto max-w-[1500px] px-6 py-8 sm:px-10 lg:px-12 relative z-10"
-        >
+      <section id="discoverScreen" class="hidden min-h-screen bg-dark-900">
+        <div class="mx-auto max-w-[1400px] px-6 py-8 sm:px-10">
           <header class="flex items-center justify-between">
-            <div>
-              <div class="text-3xl font-bold">
-                Roleplay<span
-                  class="bg-gradient-to-r from-violet-400 to-indigo-500 bg-clip-text text-transparent"
-                  >AI</span
-                >
-              </div>
-              <div
-                class="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.45em] text-zinc-500"
-              >
-                Real people. New stories.
-              </div>
-            </div>
+            <div class="text-lg font-semibold tracking-tight">RoleplayAI</div>
 
             <button
               id="openSettingsButton"
               type="button"
-              class="flex h-11 w-11 items-center justify-center rounded-full bg-dark-700/80 border border-white/5 text-zinc-400 shadow-sm transition-all hover:bg-white/10 hover:text-white active:scale-95"
+              aria-label="Settings"
+              class="flex h-10 w-10 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-white/5 hover:text-white"
             >
               <i class="fa-solid fa-gear"></i>
             </button>
           </header>
 
-          <div class="mt-16">
-            <h1 class="text-5xl font-light">
-              Find your
-              <span
-                class="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text font-medium text-transparent"
-                >Story.</span
-              >
+          <div class="mt-20">
+            <h1 class="text-4xl font-light tracking-tight sm:text-5xl">
+              Find your story
             </h1>
 
-            <div class="mt-10 w-full max-w-[700px]">
-              <div class="relative group">
-                <input
-                  id="searchInput"
-                  type="text"
-                  placeholder="Search characters, worlds, or scenarios..."
-                  class="h-14 w-full rounded border border-white/10 bg-dark-800/80 p-4 outline-none backdrop-blur-xl transition-all placeholder:text-zinc-500 focus:border-violet-500/50 focus:bg-dark-700 focus:shadow-[0_0_30px_rgba(124,58,237,0.1)]"
-                />
-              </div>
-            </div>
+            <input
+              id="searchInput"
+              type="text"
+              placeholder="Search characters, worlds, or scenarios"
+              class="mt-10 h-12 w-full max-w-xl rounded-md border border-white/10 bg-transparent px-4 text-sm outline-none transition-colors placeholder:text-zinc-600 hover:border-white/20 focus:border-zinc-400"
+            />
 
-            <div class="mt-12">
-              <div class="mb-6 flex items-end justify-between">
-                <h2 class="text-2xl font-semibold">Featured</h2>
-              </div>
+            <h2 class="mb-5 mt-16 text-sm font-medium text-zinc-500">
+              Featured
+            </h2>
 
-              <!-- Character Grid -->
-              <div
-                id="characterGrid"
-                class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-              >
-                <!-- Characters get injected here via JS, using the template below -->
-              </div>
-            </div>
+            <div
+              id="characterGrid"
+              class="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+            ></div>
           </div>
         </div>
       </section>
 
       <!-- CHAT SCREEN -->
-      <section id="chatScreen" class="hidden min-h-screen bg-dark-900">
-        <div class="flex min-h-screen">
+      <section id="chatScreen" class="hidden bg-dark-900">
+        <div class="flex h-[100dvh]">
           <!-- Sidebar -->
           <aside
-            class="hidden w-[360px] shrink-0 border-r border-white/10 bg-dark-800/40 backdrop-blur-2xl lg:flex lg:flex-col relative z-20"
+            class="hidden w-80 shrink-0 flex-col overflow-y-auto border-r border-white/[0.08] lg:flex"
           >
-            <div
-              class="flex items-center justify-between p-7 absolute top-0 w-full z-10"
-            >
+            <div class="p-5">
               <button
                 id="backButton"
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 border border-white/10 text-zinc-300 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
+                aria-label="Back"
+                class="flex h-10 w-10 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-white/5 hover:text-white"
               >
                 <i class="fa-solid fa-chevron-left"></i>
               </button>
             </div>
 
-            <div class="relative h-[480px] overflow-hidden">
+            <div class="px-6">
               <div
                 id="chatAvatar"
-                class="absolute inset-0 bg-cover bg-center transition-transform duration-1000 scale-105"
-                style="
-                  background-image: url(&quot;https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop&quot;);
-                "
-              ></div>
-              <!-- Smoother gradient fade -->
-              <div
-                class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/60 to-transparent"
+                class="aspect-[4/5] w-full rounded-md bg-dark-700 bg-cover bg-center"
               ></div>
             </div>
 
-            <div class="px-8 pb-8 relative -mt-20 z-10 flex-1 flex flex-col">
-              <div
-                class="mb-4 h-1 w-12 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 shadow-[0_0_15px_rgba(124,58,237,0.5)]"
-              ></div>
+            <div class="px-6 pb-8 pt-6">
               <h1
                 id="chatCharName"
-                class="text-4xl font-semibold tracking-tight text-white drop-shadow-md"
+                class="text-2xl font-semibold tracking-tight"
               >
                 Sarah
               </h1>
               <p
                 id="chatCharScenario"
-                class="mt-3 text-sm leading-relaxed text-zinc-400"
+                class="mt-2 text-sm leading-relaxed text-zinc-500"
               >
                 A brilliant but cynical private investigator working in a
                 cyberpunk metropolis. She trusts no one, especially not you.
@@ -313,63 +213,43 @@
             </div>
           </aside>
 
-          <!-- Chat Area -->
-          <main
-            class="flex min-w-0 flex-1 flex-col relative bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-violet-900/10 via-dark-900 to-dark-900"
-          >
-            <!-- Mobile Header -->
+          <!-- Chat area -->
+          <main class="flex min-w-0 flex-1 flex-col">
             <header
-              class="flex h-[80px] shrink-0 items-center border-b border-white/[0.04] bg-dark-900/60 backdrop-blur-xl px-5 sm:px-8 z-20"
+              class="flex h-16 shrink-0 items-center border-b border-white/[0.08] px-4 sm:px-6"
             >
               <button
                 type="button"
-                class="flex h-11 w-11 items-center justify-center rounded-full border border-white/5 bg-dark-700/50 text-zinc-400 lg:hidden hover:bg-white/10 hover:text-white"
+                aria-label="Back"
+                class="flex h-10 w-10 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-white/5 hover:text-white lg:hidden"
                 onclick="document.getElementById('backButton')?.click()"
               >
                 <i class="fa-solid fa-chevron-left"></i>
               </button>
 
-              <div class="ml-4 lg:hidden">
-                <h2 class="font-medium">Sarah</h2>
-                <p class="text-[11px] text-zinc-500">Cyberpunk Detective</p>
+              <div class="ml-3 lg:hidden">
+                <h2 id="chatHeaderName" class="text-sm font-medium"></h2>
+                <p id="chatHeaderTag" class="text-xs text-zinc-500"></p>
               </div>
 
-              <div class="ml-auto flex gap-2">
-                <button
-                  id="resetChatButton"
-                  type="button"
-                  class="flex h-11 w-11 items-center justify-center rounded-full bg-dark-700/30 text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
-                  title="Reset Conversation"
-                >
-                  <i class="fa-solid fa-rotate-right"></i>
-                </button>
-
-                <button
-                  id="chatSettingsButton"
-                  type="button"
-                  class="flex h-11 w-11 items-center justify-center rounded-full bg-dark-700/30 text-zinc-500 transition-colors hover:bg-white/10 hover:text-white"
-                  title="Chat Settings"
-                >
-                  <i class="fa-solid fa-sliders"></i>
-                </button>
-              </div>
+              <button
+                id="resetChatButton"
+                type="button"
+                title="Reset conversation"
+                aria-label="Reset conversation"
+                class="ml-auto flex h-10 w-10 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-white/5 hover:text-white"
+              >
+                <i class="fa-solid fa-rotate-right"></i>
+              </button>
             </header>
 
-            <!-- Messages Stream -->
             <div
               id="chatMessages"
-              class="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 overflow-y-auto px-5 py-8 pb-40 sm:px-8 scroll-smooth"
+              class="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col gap-5 overflow-y-auto px-5 py-8 sm:px-8"
             >
-              <!-- Sample Message -->
-              <div class="flex gap-4 self-start max-w-[85%]">
+              <div class="max-w-[85%] self-start">
                 <div
-                  class="h-8 w-8 rounded-full bg-zinc-800 bg-cover bg-center shrink-0 mt-1"
-                  style="
-                    background-image: url(&quot;https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop&quot;);
-                  "
-                ></div>
-                <div
-                  class="rounded-2xl rounded-tl-sm bg-dark-700/80 border border-white/5 px-5 py-4 text-[15px] leading-relaxed text-zinc-200"
+                  class="rounded-lg bg-dark-700 px-4 py-3 text-[15px] leading-relaxed text-zinc-200"
                 >
                   You're late. I told you to meet me at the neon district before
                   the patrol drones started their sweep. What's your excuse?
@@ -377,48 +257,30 @@
               </div>
             </div>
 
-            <!-- Floating Input Console -->
             <div
-              class="absolute bottom-0 left-0 right-0 z-30 pointer-events-none"
+              class="shrink-0 border-t border-white/[0.08] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-8"
             >
-              <!-- Gradient fade to hide text clipping -->
-              <div
-                class="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-dark-900 via-dark-900/80 to-transparent"
-              ></div>
-
-              <div
-                class="relative mx-auto max-w-4xl px-4 pb-6 sm:px-8 pointer-events-auto"
-              >
-                <form id="chatForm">
-                  <div
-                    class="flex items-center gap-2 rounded-[28px] border border-white/10 bg-dark-800/80 p-2 pl-4 pr-2 shadow-[0_20px_40px_rgba(0,0,0,0.4)] backdrop-blur-2xl transition-all focus-within:border-violet-500/30 focus-within:bg-dark-800/95 focus-within:shadow-[0_20px_40px_rgba(124,58,237,0.15)]"
+              <form id="chatForm" class="mx-auto max-w-3xl">
+                <div
+                  class="flex items-center gap-2 rounded-md border border-white/10 py-1.5 pl-4 pr-1.5 transition-colors focus-within:border-zinc-400"
+                >
+                  <input
+                    id="chatInput"
+                    type="text"
+                    placeholder="Reply"
+                    class="min-w-0 flex-1 bg-transparent py-2 text-[15px] text-white outline-none placeholder:text-zinc-600"
+                    autocomplete="off"
+                  />
+                  <button
+                    id="sendButton"
+                    type="submit"
+                    aria-label="Send"
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-white text-dark-900 transition-opacity hover:opacity-90 active:opacity-80"
                   >
-                    <button
-                      type="button"
-                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-                      title="Attach"
-                    >
-                      <i class="fa-solid fa-paperclip"></i>
-                    </button>
-
-                    <input
-                      id="chatInput"
-                      type="text"
-                      placeholder="Type your reply..."
-                      class="min-w-0 flex-1 bg-transparent px-2 py-3 text-[15px] text-white outline-none placeholder:text-zinc-500"
-                      autocomplete="off"
-                    />
-
-                    <button
-                      id="sendButton"
-                      type="submit"
-                      class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 shadow-md transition-all hover:scale-105 active:scale-95"
-                    >
-                      <i class="fa-solid fa-arrow-up text-white"></i>
-                    </button>
-                  </div>
-                </form>
-              </div>
+                    <i class="fa-solid fa-arrow-up text-sm"></i>
+                  </button>
+                </div>
+              </form>
             </div>
           </main>
         </div>
@@ -427,60 +289,43 @@
       <!-- SETTINGS DIALOG -->
       <dialog
         id="settingsDialog"
-        class="w-[calc(100%-32px)] max-w-md rounded border border-white/10 bg-dark-800 p-0 text-white shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm m-auto"
+        class="m-auto w-[calc(100%-32px)] max-w-sm rounded-lg border border-white/10 bg-dark-800 p-0 text-white"
       >
-        <div class="p-7">
+        <div class="p-6">
           <div class="flex items-center justify-between">
-            <div>
-              <p
-                class="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-400"
-              >
-                Configuration
-              </p>
-              <h2 class="mt-1 text-2xl font-semibold tracking-tight">
-                API Key
-              </h2>
-            </div>
+            <h2 class="text-lg font-semibold tracking-tight">API key</h2>
             <button
               id="closeSettingsBtn"
               type="button"
-              class="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+              aria-label="Close"
+              class="flex h-8 w-8 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-white/5 hover:text-white"
             >
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
 
-          <div class="mt-8">
-            <div class="relative">
-              <i
-                class="fa-solid fa-key absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500"
-              ></i>
-              <input
-                id="settingsApiKeyInput"
-                type="password"
-                placeholder="sk-..."
-                class="w-full rounded-2xl border border-white/10 bg-dark-900/50 py-4 pl-12 pr-4 text-[15px] outline-none transition-all placeholder:text-zinc-600 focus:border-violet-500/50 focus:bg-dark-900"
-              />
-            </div>
-            <p class="mt-3 text-xs text-zinc-500 ml-1">
-              Your key is stored locally and never sent to our servers.
-            </p>
-          </div>
+          <input
+            id="settingsApiKeyInput"
+            type="password"
+            placeholder="sk-..."
+            class="mt-6 h-12 w-full rounded-md border border-white/10 bg-transparent px-4 text-sm outline-none transition-colors placeholder:text-zinc-600 focus:border-zinc-400"
+          />
+          <p class="mt-2 text-xs text-zinc-500">Stored only in this browser.</p>
 
-          <div class="mt-8 flex gap-3">
+          <div class="mt-6 flex gap-3">
             <button
               id="saveSettingsButton"
               type="button"
-              class="flex-1 rounded bg-white px-5 py-3.5 text-[15px] font-semibold text-dark-900 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+              class="h-11 flex-1 rounded-md bg-white text-sm font-medium text-dark-900 transition-opacity hover:opacity-90 active:opacity-80"
             >
-              Save Changes
+              Save changes
             </button>
             <button
               id="clearKeyButton"
               type="button"
-              class="rounded border border-white/10 bg-dark-700/50 px-6 py-3.5 text-[15px] font-medium text-red-400 transition-colors hover:bg-red-500/10 hover:border-red-500/20"
+              class="h-11 rounded-md border border-white/10 px-5 text-sm text-zinc-400 transition-colors hover:border-red-500/40 hover:text-red-400"
             >
-              Clear
+              Clear key
             </button>
           </div>
         </div>
@@ -489,39 +334,30 @@
       <!-- RESET DIALOG -->
       <dialog
         id="resetDialog"
-        class="w-[calc(100%-32px)] max-w-md rounded-[28px] border border-white/10 bg-dark-800 p-0 text-white shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm m-auto"
+        class="m-auto w-[calc(100%-32px)] max-w-sm rounded-lg border border-white/10 bg-dark-800 p-0 text-white"
       >
-        <div class="p-7">
-          <div
-            class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-red-500/10 text-red-400"
-          >
-            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
-          </div>
+        <div class="p-6">
+          <h2 class="text-lg font-semibold tracking-tight">
+            Reset conversation?
+          </h2>
+          <p class="mt-2 text-sm leading-relaxed text-zinc-500">
+            This permanently erases your story with this character.
+          </p>
 
-          <div class="text-center">
-            <h2 class="text-2xl font-semibold tracking-tight">
-              Reset Conversation?
-            </h2>
-            <p class="mt-3 text-[15px] leading-relaxed text-zinc-400">
-              This will permanently erase the current story with this character.
-              You cannot undo this action.
-            </p>
-          </div>
-
-          <div class="mt-8 flex gap-3">
+          <div class="mt-6 flex gap-3">
             <button
               id="cancelResetButton"
               type="button"
-              class="flex-1 rounded-2xl border border-white/10 bg-dark-700/50 py-3.5 text-[15px] font-medium text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
+              class="h-11 flex-1 rounded-md border border-white/10 text-sm text-zinc-300 transition-colors hover:bg-white/5"
             >
               Cancel
             </button>
             <button
               id="confirmResetButton"
               type="button"
-              class="flex-1 rounded-2xl bg-red-500 py-3.5 text-[15px] font-semibold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+              class="h-11 flex-1 rounded-md bg-red-500 text-sm font-medium text-white transition-opacity hover:opacity-90 active:opacity-80"
             >
-              Yes, Reset
+              Reset
             </button>
           </div>
         </div>
@@ -529,43 +365,22 @@
 
       <!-- CHARACTER CARD TEMPLATE -->
       <template id="characterCardTemplate">
-        <button
-          type="button"
-          class="group relative aspect-[3/4] w-full overflow-hidden rounded border border-white/5 bg-dark-800 text-left transition-all duration-300 hover:-translate-y-1.5 hover:border-violet-500/40 hover:shadow-[0_15px_30px_rgba(124,58,237,0.15)]"
-        >
-          <!-- Background image container -->
+        <button type="button" class="group block w-full text-left">
           <div
-            class="char-img absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+            class="char-img aspect-[3/4] w-full rounded-md bg-dark-700 bg-cover bg-center opacity-90 transition-opacity duration-200 group-hover:opacity-100"
           ></div>
-
-          <!-- Gradient overlay -->
-          <div
-            class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/40 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100"
-          ></div>
-
-          <!-- Content -->
-          <div
-            class="absolute inset-x-0 bottom-0 flex flex-col justify-end p-5 h-full"
-          >
-            <div
-              class="translate-y-2 transition-transform duration-300 group-hover:translate-y-0"
-            >
-              <span
-                class="char-tag inline-block rounded-full border border-violet-500/20 bg-violet-500/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-violet-300 backdrop-blur-md"
-              ></span>
-              <h3
-                class="char-name mt-2 text-xl font-semibold tracking-tight text-white drop-shadow-md"
-              ></h3>
-              <p
-                class="char-desc mt-1.5 line-clamp-2 text-[13px] leading-snug text-zinc-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              ></p>
-            </div>
-          </div>
+          <h3
+            class="char-name mt-3 text-[15px] font-medium tracking-tight"
+          ></h3>
+          <span class="char-tag mt-0.5 block text-xs text-zinc-500"></span>
+          <p
+            class="char-desc mt-2 line-clamp-2 text-[13px] leading-snug text-zinc-500"
+          ></p>
         </button>
       </template>
     </div>
 
-    <!-- Screen Management Logic (Preserved from original) -->
+    <!-- Screen management logic (unchanged) -->
     <script>
       const screens = [
         document.getElementById("keyScreen"),
@@ -596,7 +411,6 @@
       updateScreens();
     </script>
 
-    <!-- Keep your external script reference -->
     <script src="script.js"></script>
   </body>
 </html>

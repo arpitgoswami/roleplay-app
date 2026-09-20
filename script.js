@@ -5,6 +5,8 @@ const FALLBACK_ENDPOINTS = [
   "https://gen.pollinations.ai/openai",
   "https://text.pollinations.ai/openai",
 ];
+const REQUEST_TIMEOUT_MS = 45000;
+const MAX_CONTEXT_MESSAGES = 40;
 
 const BASE_SYSTEM_PROMPT = `You are the narrator of the scene, not the character. Narrate what the characters do, say, notice, and feel around me without ever taking control of my decisions, thoughts, dialogue, or actions.
 
@@ -43,38 +45,44 @@ Scenario:`;
 
 let characters = [];
 
+// Characters with a reply currently being generated
+const pending = new Set();
+// Last failed request, shown under the messages until the next attempt
+let activeError = null; // { characterId, message }
+
 const state = loadState();
 
 // ─── Element refs ────────────────────────────────────────────────────────────
-const keyScreen = document.getElementById("keyScreen");
-const discoverScreen = document.getElementById("discoverScreen");
-const chatScreen = document.getElementById("chatScreen");
-const keyForm = document.getElementById("keyForm");
-const apiKeyInput = document.getElementById("apiKeyInput");
-const searchInput = document.getElementById("searchInput");
-const characterGrid = document.getElementById("characterGrid");
-const characterCardTemplate = document.getElementById("characterCardTemplate");
-const backButton = document.getElementById("backButton");
-const chatMessages = document.getElementById("chatMessages");
-const chatForm = document.getElementById("chatForm");
-const chatInput = document.getElementById("chatInput");
-const sendButton = document.getElementById("sendButton");
-const openSettingsButton = document.getElementById("openSettingsButton");
-const chatSettingsButton = document.getElementById("chatSettingsButton");
-const resetChatButton = document.getElementById("resetChatButton");
-const settingsDialog = document.getElementById("settingsDialog");
-const resetDialog = document.getElementById("resetDialog");
-const settingsApiKeyInput = document.getElementById("settingsApiKeyInput");
-const saveSettingsButton = document.getElementById("saveSettingsButton");
-const clearKeyButton = document.getElementById("clearKeyButton");
-const confirmResetButton = document.getElementById("confirmResetButton");
-const closeSettingsBtn = document.getElementById("closeSettingsBtn");
-const closeResetBtn = document.getElementById("closeResetBtn");
-const cancelResetButton = document.getElementById("cancelResetButton");
-// New redesign elements
-const chatAvatar = document.getElementById("chatAvatar");
-const chatCharName = document.getElementById("chatCharName");
-const chatCharScenario = document.getElementById("chatCharScenario");
+const $ = (id) => document.getElementById(id);
+
+const keyScreen = $("keyScreen");
+const discoverScreen = $("discoverScreen");
+const chatScreen = $("chatScreen");
+const keyForm = $("keyForm");
+const apiKeyInput = $("apiKeyInput");
+const searchInput = $("searchInput");
+const characterGrid = $("characterGrid");
+const characterCardTemplate = $("characterCardTemplate");
+const backButton = $("backButton");
+const chatMessages = $("chatMessages");
+const chatForm = $("chatForm");
+const chatInput = $("chatInput");
+const sendButton = $("sendButton");
+const openSettingsButton = $("openSettingsButton");
+const resetChatButton = $("resetChatButton");
+const settingsDialog = $("settingsDialog");
+const resetDialog = $("resetDialog");
+const settingsApiKeyInput = $("settingsApiKeyInput");
+const saveSettingsButton = $("saveSettingsButton");
+const clearKeyButton = $("clearKeyButton");
+const confirmResetButton = $("confirmResetButton");
+const closeSettingsBtn = $("closeSettingsBtn");
+const cancelResetButton = $("cancelResetButton");
+const chatAvatar = $("chatAvatar");
+const chatCharName = $("chatCharName");
+const chatCharScenario = $("chatCharScenario");
+const chatHeaderName = $("chatHeaderName");
+const chatHeaderTag = $("chatHeaderTag");
 
 // ─── Bootstrap ───────────────────────────────────────────────────────────────
 bootstrapApp();
@@ -87,60 +95,35 @@ keyForm.addEventListener("submit", (e) => {
   showScreen("discover");
 });
 
-backButton.addEventListener("click", () => showScreen("discover"));
+backButton.addEventListener("click", () => {
+  state.activeCharacterId = null;
+  saveState();
+  showScreen("discover");
+});
 
 searchInput?.addEventListener("input", () =>
   renderCharacterGrid(searchInput.value),
 );
 
-chatForm.addEventListener("submit", async (e) => {
+chatForm.addEventListener("submit", (e) => {
   e.preventDefault();
+  const characterId = state.activeCharacterId;
+  if (!characterId || pending.has(characterId)) return;
+
+  // An empty send asks the character to continue the scene
   const text = chatInput.value.trim();
-  const outgoingText = text || "Continue";
-  const shouldShowUserBubble = Boolean(text);
-
-  if (!state.activeCharacterId) return;
-
-  const conversation = getConversation(state.activeCharacterId);
-  const character = getCharacterById(state.activeCharacterId);
-  if (!character) return;
-
-  conversation.push({
+  getConversation(characterId).push({
     role: "user",
-    content: outgoingText,
-    hidden: !shouldShowUserBubble,
+    content: text || "Continue",
+    hidden: !text,
   });
   chatInput.value = "";
-  renderMessages(character, conversation);
   saveState();
-
-  try {
-    setChatPending(true);
-    const reply = await generateCharacterReply(
-      state.activeCharacterId,
-      conversation,
-    );
-    conversation.push({ role: "assistant", content: reply });
-  } catch (err) {
-    conversation.push({
-      role: "system",
-      content:
-        err.message ||
-        "The reply could not be generated with the current API settings.",
-    });
-  } finally {
-    setChatPending(false);
-    renderMessages(character, conversation);
-    saveState();
-  }
+  requestReply(characterId);
 });
 
 // Settings dialog
 openSettingsButton?.addEventListener("click", () => {
-  settingsApiKeyInput.value = state.apiKey || "";
-  settingsDialog.showModal();
-});
-chatSettingsButton?.addEventListener("click", () => {
   settingsApiKeyInput.value = state.apiKey || "";
   settingsDialog.showModal();
 });
@@ -153,6 +136,7 @@ saveSettingsButton?.addEventListener("click", () => {
   settingsDialog.close();
   if (!state.apiKey) showScreen("key");
 });
+
 clearKeyButton?.addEventListener("click", () => {
   state.apiKey = "";
   state.activeCharacterId = null;
@@ -165,22 +149,27 @@ clearKeyButton?.addEventListener("click", () => {
 
 // Reset dialog
 resetChatButton?.addEventListener("click", () => {
-  if (!state.activeCharacterId) return;
-  resetDialog.showModal();
+  if (state.activeCharacterId) resetDialog.showModal();
 });
-closeResetBtn?.addEventListener("click", () => resetDialog.close());
 cancelResetButton?.addEventListener("click", () => resetDialog.close());
 
 confirmResetButton?.addEventListener("click", () => {
-  if (!state.activeCharacterId) return;
   const character = getCharacterById(state.activeCharacterId);
   if (!character) return;
 
-  state.conversations[state.activeCharacterId] = [];
+  state.conversations[character.id] = [];
+  if (activeError?.characterId === character.id) activeError = null;
   ensureStarterConversation(character);
   saveState();
-  renderMessages(character, getConversation(state.activeCharacterId));
+  refreshChat();
   resetDialog.close();
+});
+
+// Click on the backdrop closes a dialog
+[settingsDialog, resetDialog].forEach((dialog) => {
+  dialog?.addEventListener("click", (e) => {
+    if (e.target === dialog) dialog.close();
+  });
 });
 
 // ─── Core functions ───────────────────────────────────────────────────────────
@@ -191,57 +180,92 @@ async function bootstrapApp() {
     restoreApp();
   } catch (err) {
     console.error(err);
-    characterGrid.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">⚠</div>
-        <h3>Couldn't load characters</h3>
-        <p>Make sure <code>characters.json</code> exists and the app is served from a local server.</p>
-      </div>`;
-    showScreen("discover");
+    characterGrid.replaceChildren(
+      createEmptyState(
+        "Couldn't load characters",
+        "Make sure characters.json exists and the app is served from a local server.",
+      ),
+    );
+    showScreen(state.apiKey ? "discover" : "key");
   }
 }
 
 async function loadCharacters() {
   const res = await fetch(DATA_URL);
-  if (!res.ok)
+  if (!res.ok) {
     throw new Error(`Failed to load ${DATA_URL} — status ${res.status}.`);
+  }
   const data = await res.json();
   const list = Array.isArray(data) ? data : data.characters;
-  if (!Array.isArray(list))
+  if (!Array.isArray(list)) {
     throw new Error("characters.json must contain a characters array.");
+  }
   return list;
 }
 
 function loadState() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState();
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return { ...defaultState(), ...(saved || {}) };
   } catch {
     return defaultState();
   }
 }
+
 function defaultState() {
   return { apiKey: "", activeCharacterId: null, conversations: {} };
 }
+
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (err) {
+    console.warn("Could not save state:", err);
+  }
 }
 
 function restoreApp() {
   apiKeyInput.value = state.apiKey || "";
+
   if (!state.apiKey) {
     showScreen("key");
     return;
   }
-  if (state.activeCharacterId) {
+
+  // The saved character may have been removed from characters.json
+  if (state.activeCharacterId && getCharacterById(state.activeCharacterId)) {
     openCharacter(state.activeCharacterId);
     return;
   }
+
+  state.activeCharacterId = null;
   showScreen("discover");
+}
+
+// ─── Small DOM helpers ────────────────────────────────────────────────────────
+function createEl(tag, className = "", text = "") {
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  if (text) el.textContent = text;
+  return el;
+}
+
+function setBackground(el, url) {
+  el.style.backgroundImage = url ? `url(${JSON.stringify(url)})` : "";
+}
+
+function createEmptyState(title, body) {
+  const wrap = createEl("div", "col-span-full py-20 text-center");
+  wrap.append(
+    createEl("h3", "text-base font-medium text-zinc-300", title),
+    createEl("p", "mt-2 text-sm text-zinc-500", body),
+  );
+  return wrap;
 }
 
 // ─── Character grid ───────────────────────────────────────────────────────────
 function renderCharacterGrid(query = "") {
-  characterGrid.innerHTML = "";
+  characterGrid.replaceChildren();
   const q = query.trim().toLowerCase();
 
   const filtered = characters.filter((c) => {
@@ -250,30 +274,20 @@ function renderCharacterGrid(query = "") {
   });
 
   if (filtered.length === 0) {
-    characterGrid.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">☽</div>
-        <h3>No characters found</h3>
-        <p>Try a different search term.</p>
-      </div>`;
+    characterGrid.appendChild(
+      createEmptyState("No characters found", "Try a different search."),
+    );
     return;
   }
 
-  filtered.forEach((character, i) => {
+  filtered.forEach((character) => {
     const frag = characterCardTemplate.content.cloneNode(true);
     const btn = frag.querySelector("button");
-    const img = frag.querySelector(".char-img");
-    const tag = frag.querySelector(".char-tag");
-    const name = frag.querySelector(".char-name");
-    const desc = frag.querySelector(".char-desc");
 
-    img.style.backgroundImage = `url("${character.art}")`;
-    tag.textContent = character.badge;
-    name.textContent = character.name;
-    desc.textContent = character.story;
-
-    // Stagger card entrance
-    btn.style.animationDelay = `${i * 0.07}s`;
+    setBackground(frag.querySelector(".char-img"), character.art);
+    frag.querySelector(".char-tag").textContent = character.badge || "";
+    frag.querySelector(".char-name").textContent = character.name;
+    frag.querySelector(".char-desc").textContent = character.story || "";
 
     btn.addEventListener("click", () => openCharacter(character.id));
     characterGrid.appendChild(frag);
@@ -289,20 +303,22 @@ function openCharacter(characterId) {
   ensureStarterConversation(character);
   saveState();
 
-  // Populate chat header (new redesign elements)
-  if (chatAvatar) {
-    chatAvatar.style.backgroundImage = `url('${character.art}')`;
-  }
+  setBackground(chatAvatar, character.art);
   if (chatCharName) chatCharName.textContent = character.name;
-  if (chatCharScenario) chatCharScenario.textContent = character.badge;
+  if (chatCharScenario) chatCharScenario.textContent = character.badge || "";
+  if (chatHeaderName) chatHeaderName.textContent = character.name;
+  if (chatHeaderTag) chatHeaderTag.textContent = character.badge || "";
 
-  renderMessages(character, getConversation(characterId));
   showScreen("chat");
+  refreshChat();
+
+  // Don't pop the keyboard open on touch devices
+  if (window.matchMedia("(hover: hover)").matches) chatInput.focus();
 }
 
 function ensureStarterConversation(character) {
   const conv = getConversation(character.id);
-  if (conv.length === 0) {
+  if (conv.length === 0 && character.opener) {
     conv.push({ role: "assistant", content: character.opener });
   }
 }
@@ -317,52 +333,102 @@ function getCharacterById(id) {
 }
 
 // ─── Render messages ──────────────────────────────────────────────────────────
-function renderMessages(character, messages) {
-  chatMessages.innerHTML = "";
+function refreshChat() {
+  const character = getCharacterById(state.activeCharacterId);
+  if (!character) return;
+  renderMessages(character, getConversation(character.id));
+  updateComposer();
+}
 
-  // Scenario banner
-  const banner = document.createElement("div");
-  banner.style.cssText = `
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 16px;
-    padding: 14px 18px;
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--copyDim);
-    font-style: italic;
-    margin-bottom: 4px;
-  `;
-  banner.textContent = character.story;
-  chatMessages.appendChild(banner);
+function renderMessages(character, messages) {
+  chatMessages.replaceChildren();
+
+  if (character.story) {
+    chatMessages.appendChild(
+      createEl(
+        "p",
+        "border-b border-white/[0.06] pb-6 text-center text-xs leading-relaxed text-zinc-500",
+        character.story,
+      ),
+    );
+  }
 
   messages.forEach((msg) => {
     if (msg.role === "system" || msg.hidden) return;
 
-    const wrap = document.createElement("div");
-    wrap.className = `msg ${msg.role}`;
-
-    // Avatar
-    const avatar = document.createElement("div");
-    avatar.className = "msg-avatar";
-    if (msg.role === "assistant") {
-      avatar.style.backgroundImage = `url('${character.art}')`;
-    } else {
-      avatar.textContent = "S";
-    }
-
-    // Bubble
-    const bubble = document.createElement("div");
-    bubble.className = "msg-bubble";
-    if (msg.role === "assistant") bubble.style.fontStyle = "italic";
-    bubble.textContent = msg.content;
-
-    wrap.appendChild(avatar);
-    wrap.appendChild(bubble);
-    chatMessages.appendChild(wrap);
+    const isUser = msg.role === "user";
+    const bubble = createEl(
+      "div",
+      "max-w-[85%] whitespace-pre-wrap rounded-lg px-4 py-3 text-[15px] leading-relaxed " +
+        (isUser
+          ? "self-end bg-white text-dark-900"
+          : "self-start bg-dark-700 text-zinc-200"),
+      msg.content,
+    );
+    chatMessages.appendChild(bubble);
   });
 
+  if (pending.has(character.id)) {
+    chatMessages.appendChild(createTypingIndicator());
+  }
+
+  if (activeError?.characterId === character.id) {
+    chatMessages.appendChild(createErrorNotice(activeError, character.id));
+  }
+
   chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function createTypingIndicator() {
+  const bubble = createEl(
+    "div",
+    "flex items-center gap-1 self-start rounded-lg bg-dark-700 px-4 py-4",
+  );
+  bubble.setAttribute("role", "status");
+  bubble.setAttribute("aria-label", "Typing");
+  for (let i = 0; i < 3; i++) {
+    const dot = createEl(
+      "span",
+      "h-1.5 w-1.5 rounded-full bg-zinc-500 motion-safe:animate-pulse",
+    );
+    dot.style.animationDelay = `${i * 0.2}s`;
+    bubble.appendChild(dot);
+  }
+  return bubble;
+}
+
+function createErrorNotice(error, characterId) {
+  const box = createEl(
+    "div",
+    "max-w-[85%] self-start rounded-lg border border-red-500/20 px-4 py-3 text-sm text-red-300",
+  );
+  box.appendChild(createEl("p", "", error.message));
+
+  if (!error.fatal) {
+    const retry = createEl(
+      "button",
+      "mt-2 text-xs font-medium text-white underline underline-offset-4 hover:opacity-80",
+      "Try again",
+    );
+    retry.type = "button";
+    retry.addEventListener("click", () => requestReply(characterId));
+    box.appendChild(retry);
+  }
+  return box;
+}
+
+function updateComposer() {
+  const busy = pending.has(state.activeCharacterId);
+  chatInput.disabled = busy;
+  sendButton.disabled = busy;
+  sendButton.replaceChildren(
+    createEl(
+      "i",
+      busy
+        ? "fa-solid fa-circle-notch fa-spin text-sm"
+        : "fa-solid fa-arrow-up text-sm",
+    ),
+  );
 }
 
 // ─── Screen switching ─────────────────────────────────────────────────────────
@@ -373,62 +439,71 @@ function showScreen(name) {
     [chatScreen, "chat"],
   ].forEach(([el, id]) => {
     if (!el) return;
-    if (id === name) {
-      el.classList.add("active");
-      el.classList.remove("hidden");
-    } else {
-      el.classList.remove("active");
-      el.classList.add("hidden");
-    }
+    const active = id === name;
+    el.classList.toggle("active", active);
+    el.classList.toggle("hidden", !active);
+    if (id === "key") el.classList.toggle("flex", active);
   });
 }
 
-// ─── Chat state helpers ───────────────────────────────────────────────────────
-function setChatPending(isPending) {
-  chatInput.disabled = isPending;
-  sendButton.disabled = isPending;
+// ─── Reply generation ─────────────────────────────────────────────────────────
+async function requestReply(characterId) {
+  const character = getCharacterById(characterId);
+  if (!character || pending.has(characterId)) return;
 
-  if (isPending) {
-    // Show typing indicator inside messages
-    const typing = document.createElement("div");
-    typing.className = "msg assistant";
-    typing.id = "typingIndicator";
-    const av = document.createElement("div");
-    av.className = "msg-avatar";
-    const character = getCharacterById(state.activeCharacterId);
-    if (character) av.style.backgroundImage = `url('${character.art}')`;
-    const indicator = document.createElement("div");
-    indicator.className = "msg-bubble typing-indicator";
-    indicator.innerHTML = "<span></span><span></span><span></span>";
-    typing.appendChild(av);
-    typing.appendChild(indicator);
-    chatMessages.appendChild(typing);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+  const conversation = getConversation(characterId);
+  activeError = null;
+  pending.add(characterId);
+  refreshChat();
 
-    sendButton.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;margin:auto;"></div>`;
-  } else {
-    document.getElementById("typingIndicator")?.remove();
-    sendButton.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M8 2l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  try {
+    const reply = await generateCharacterReply(character, conversation);
+    conversation.push({ role: "assistant", content: reply });
+  } catch (err) {
+    activeError = {
+      characterId,
+      message:
+        err.message ||
+        "The reply could not be generated with the current API settings.",
+      fatal: Boolean(err.fatal),
+    };
+  } finally {
+    pending.delete(characterId);
+    saveState();
+    // The person may have opened another character while waiting
+    if (state.activeCharacterId === characterId) {
+      refreshChat();
+      if (window.matchMedia("(hover: hover)").matches) chatInput.focus();
+    }
   }
 }
 
-// ─── API call ─────────────────────────────────────────────────────────────────
-async function generateCharacterReply(characterId, conversation) {
+async function generateCharacterReply(character, conversation) {
   if (!state.apiKey) {
-    throw new Error("Add your Pollinations API key before starting a chat.");
+    const err = new Error(
+      "Add your Pollinations API key in settings before chatting.",
+    );
+    err.fatal = true;
+    throw err;
   }
 
-  const character = getCharacterById(characterId);
+  const history = conversation
+    .filter((m) => m.role !== "system")
+    .slice(-MAX_CONTEXT_MESSAGES)
+    .map((m) => ({ role: m.role, content: m.content }));
+
   const messages = [
     { role: "system", content: `${BASE_SYSTEM_PROMPT} ${character.story}` },
-    ...conversation
-      .filter((m) => m.role !== "system")
-      .map((m) => ({ role: m.role, content: m.content })),
+    ...history,
   ];
 
   let lastError = new Error("No compatible Pollinations endpoint responded.");
 
   for (const endpoint of FALLBACK_ENDPOINTS) {
+    const host = new URL(endpoint).host;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
     try {
       const res = await fetch(endpoint, {
         method: "POST",
@@ -442,13 +517,18 @@ async function generateCharacterReply(characterId, conversation) {
           temperature: 0.9,
           private: true,
         }),
+        signal: controller.signal,
       });
 
-      if (!res.ok) {
-        throw new Error(
-          `${new URL(endpoint).host} returned status ${res.status}.`,
+      // A bad key will fail on every endpoint, so stop here
+      if (res.status === 401 || res.status === 403) {
+        const err = new Error(
+          "Your API key was rejected. Check it in settings.",
         );
+        err.fatal = true;
+        throw err;
       }
+      if (!res.ok) throw new Error(`${host} returned status ${res.status}.`);
 
       const data = await res.json();
       const content =
@@ -457,14 +537,16 @@ async function generateCharacterReply(characterId, conversation) {
         data?.message ||
         data?.output;
 
-      if (!content)
-        throw new Error(
-          `${new URL(endpoint).host} responded without chat text.`,
-        );
-
-      return content.trim();
+      if (!content) throw new Error(`${host} responded without chat text.`);
+      return String(content).trim();
     } catch (err) {
-      lastError = err;
+      if (err.fatal) throw err;
+      lastError =
+        err.name === "AbortError"
+          ? new Error(`${host} took too long to respond.`)
+          : err;
+    } finally {
+      clearTimeout(timer);
     }
   }
 

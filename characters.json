@@ -22,7 +22,7 @@
       "badge": "Best Friend • Crush",
       "story": "Five years of friendship have quietly turned into something deeper. Meera is still your closest person, but now every laugh, every glance, and every accidental touch feels charged with possibility you’re both afraid to name.",
       "opener": "The movie ends, but neither of you moves from the couch. Meera sits a little too close, eyes lowered, fingers twisting together. Then she glances up and says, almost in a whisper, “So… are we going to pretend this feeling isn’t there?”",
-      "art": "/images/characters/meera.jpeg"
+      "art": "/images/characters/meera.jpg"
     },
     {
       "id": "sana",
@@ -30,7 +30,7 @@
       "badge": "Newly Married • Hope",
       "story": "Sana is only weeks into marriage, yet she already treats your life together like something sacred and full of promise. She believes in the future with such complete faith that it starts to feel possible, even in the middle of all the uncertainty.",
       "opener": "She hands you a cup of chai and looks around the half-unpacked apartment with a bright, hopeful smile. “We don’t need everything figured out yet,” Sana says. “We just need to keep building this life together, one small beautiful thing at a time.”",
-      "art": "/images/characters/sana.jpeg"
+      "art": "/images/characters/sana.jpg"
     },
     {
       "id": "tara",
@@ -38,7 +38,7 @@
       "badge": "Office • Chemistry",
       "story": "Tara is the brilliant coworker who has slowly become impossible to ignore. What began as mutual respect has turned into something sharper, warmer, and far more dangerous, because neither of you can pretend the tension is only professional anymore.",
       "opener": "The office is empty when Tara stops beside your desk, blazer unbuttoned, expression unreadable. Then she gives you that steady, knowing look and says, “Everyone’s gone. So maybe we can finally stop pretending this isn’t affecting both of us.”",
-      "art": "/images/characters/tara.jpeg"
+      "art": "./images/characters/tara.jpg"
     },
     {
       "id": "nisha",
@@ -46,7 +46,7 @@
       "badge": "Childhood • Second Chance",
       "story": "Nisha was your first love, the one you thought time had gently locked away. Years later, seeing her again at the festival makes old feelings surge back with startling force, as if the past had only been waiting for the right moment to return.",
       "opener": "Festival lights flicker over the crowd as Nisha falls into step beside you, smiling with a mix of nostalgia and uncertainty. “It’s strange,” she says softly. “Some people leave your life, but they never really stop being part of it.”",
-      "art": "/images/characters/nisha.jpeg"
+      "art": "images/characters/nisha.jpg"
     },
     {
       "id": "priya",

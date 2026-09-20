@@ -1,4 +1,4 @@
-<img width="1447" height="837" alt="image" src="https://github.com/user-attachments/assets/1cb6791b-c6ba-48a0-b04b-1c7aaa3aed8b" />
+<img width="1917" height="1078" alt="image" src="https://github.com/user-attachments/assets/f61201fe-53b4-4645-a238-572ef888eafd" />
 
 # Roleplay Application
 
